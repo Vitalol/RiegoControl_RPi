@@ -24,7 +24,8 @@ SECRET_KEY = 'django-insecure-+o03^^s9^t!y3a#+_#@e4)4hd2zqui8l8)+m4r#wr327wuszif
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1","192.168.1.139", "192.168.1.149"]
+ALLOWED_HOSTS = ["127.0.0.1", "192.168.1.139",
+                 "192.168.1.149", "192.168.1.144", 'raspberrypi']
 
 
 # Application definition
@@ -48,7 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
 ]
 
 ROOT_URLCONF = 'pidjango.urls'
