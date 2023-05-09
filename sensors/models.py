@@ -7,4 +7,4 @@ class Sensor(models.Model):
     type = models.IntegerField(default = 1)
     name = models.CharField(max_length = 255)
     value = models.FloatField(default = 0)
-    date = models.TimeField(default = datetime.datetime.now) 
+    date = models.DateTimeField(default = datetime.datetime.now) 

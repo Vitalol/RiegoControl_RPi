@@ -1,0 +1,62 @@
+[
+    {
+        "model": "sensors.sensor",
+        "pk": 1,
+        "fields": {
+            "type": 1,
+            "name": "Sector_A",
+            "value": 23.05,
+            "date": "2023-05-07T15:29:38.829Z"
+        }
+    },
+    {
+        "model": "sensors.sensor",
+        "pk": 2,
+        "fields": {
+            "type": 2,
+            "name": "Sector_A",
+            "value": 24.05,
+            "date": "2023-05-07T15:29:38.829Z"
+        }
+    },
+    {
+        "model": "sensors.sensor",
+        "pk": 3,
+        "fields": {
+            "type": 3,
+            "name": "Sector_A",
+            "value": 26.05,
+            "date": "2023-05-07T15:29:38.829Z"
+        }
+    },
+    {
+        "model": "sensors.sensor",
+        "pk": 4,
+        "fields": {
+            "type": 1,
+            "name": "Sector_B",
+            "value": 23.05,
+            "date": "2023-05-07T15:29:38.829Z"
+        }
+    },
+    {
+        "model": "sensors.sensor",
+        "pk": 5,
+        "fields": {
+            "type": 2,
+            "name": "Sector_B",
+            "value": 24.05,
+            "date": "2023-05-07T15:29:38.829Z"
+        }
+    },
+    {
+        "model": "sensors.sensor",
+        "pk": 6,
+        "fields": {
+            "type": 3,
+            "name": "Sector_B",
+            "value": 26.05,
+            "date": "2023-05-07T15:29:38.829Z"
+        }
+    }
+]
