@@ -11,14 +11,14 @@ class Sensor(models.Model):
 
 
 class Measure(models.Model):
-    sensor = models.ForeignKey(Sensor)
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     type = models.IntegerField(default = 1)
     value = models.FloatField(default = 0)
     date = models.DateTimeField(default = datetime.datetime.now)
 
 
 class schedule(models.Model):
-    sensor = models.ForeignKey(Sensor)
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     month_days = models.IntegerField(default = 0)
     week_days = models.IntegerField(default = 0)
     hour = models.IntegerField(default = 0)
