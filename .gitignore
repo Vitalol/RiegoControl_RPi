@@ -1,3 +1,4 @@
 diario.log
 wenv
 djenv
+pidjango/__pycache__/*

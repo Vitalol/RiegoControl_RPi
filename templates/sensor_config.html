@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Config</title>
+</head>
+<body>
+<h1>RiegoControl</h1>
+
+<p1>Configuración de Sensor {{sensor.name}}</p1>
+
+<script>
+    function mostrarCampos() {
+        var seleccion = document.getElementById("primerSelect").value;
+        var reglas = document.getElementById("reglas");
+        var programacion = document.getElementById("programacion");
+
+        if (seleccion === "opcionA") {
+            reglas.style.display = "block";
+            programacion.style.display = "none";
+        } else if (seleccion === "opcionB") {
+            reglas.style.display = "none";
+            programacion.style.display = "block";
+        } else {
+            reglas.style.display = "none";
+            programacion.style.display = "none";
+        }
+    }
+</script>
+
+<form method="POST" action="{% url 'config' sensor_id=sensor.id  %}">
+    {% csrf_token %}
+    <select id="primerSelect" onchange="mostrarCampos()">
+        <option value="">Seleccione una opción</option>
+        <option value="opcionA">Regla</option>
+        <option value="opcionB">Programación</option>
+    </select>
+
+    <div id="reglas" style="display: none;">
+
+        <label for="nombre">Nombre:</label>
+        <input type="text" name="campoA1">
+
+        <label for="nombre">Nombre:</label>
+        <input type="text" name="campoA2">
+    </div>
+
+    <div id="programacion" style="display: none;">
+        <input type="text" name="campoB1">
+        <input type="text" name="campoB2">
+    </div>
+
+    <button type="submit">Enviar</button>
+</form>
+
+
+
+<!--<form method="POST" action="{% url 'config' sensor_id=sensor.id  %}">
+    {% csrf_token %}
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" required>
+    <label for="direccion">Dirección:</label>
+    <input type="text" id="direccion" name="direccion" required>
+    <button type="submit">Enviar</button>
+</form> -->
+</body>
+</html>

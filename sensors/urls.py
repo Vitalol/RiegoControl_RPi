@@ -2,5 +2,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('sensors/', views.sensors, name='sensors'),
+    path('config/<int:sensor_id>/', views.sensors_conf, name='config'),
 ]

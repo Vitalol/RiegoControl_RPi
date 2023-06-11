@@ -13,14 +13,13 @@
     <table border = "1">
     <tr>
         <td> Nombre </td>
-        <td> Valor </td>
-        <td> Fecha </td>
+        <td> Types </td>
     </tr>
     {% for x in sensors %}
         <tr>
-            <td> {{ x.name }}</td>
-            <td> {{ x.value }}</td>
-            <td> {{ x.date }}</td>
+            <td> <a href="{% url 'config' sensor_id=x.id  %}">{{x.name}}</a>
+            </td>
+            <td> {{ x.types }}</td>
         </tr>
         {%endfor%}
     </table>
