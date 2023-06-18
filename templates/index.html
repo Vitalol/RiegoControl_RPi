@@ -5,23 +5,34 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
 </head>
 <body>
     <h1>RiegoControl</h1>
     <p>Esta es la interfaz de configuración de RiegoControl</p>
     <h1>Sensores</h1>
-    <table border = "1">
-    <tr>
-        <td> Nombre </td>
-        <td> Types </td>
-    </tr>
-    {% for x in sensors %}
-        <tr>
-            <td> <a href="{% url 'config' sensor_id=x.id  %}">{{x.name}}</a>
-            </td>
-            <td> {{ x.types }}</td>
-        </tr>
-        {%endfor%}
+    <table class="table table-striped table-bordered table-hover table-responsive">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col"> Nombre </th>
+                <th scope="col"> Types </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for x in sensors %}
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'config' sensor_id=x.id  %}">{{x.name}}</a>
+                    </td>
+                    <td scope="row"> {{ x.types }} </td>
+                </tr>
+                {%endfor%}
+        </tbody>
     </table>
+
+
+    
 </body>
 </html>
