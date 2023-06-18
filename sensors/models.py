@@ -24,10 +24,21 @@ class Measure(models.Model):
     value = models.FloatField(default = 0)
     date = models.DateTimeField(default = datetime.datetime.now)
 
+class Actuator(models.Model):
+    name = models.CharField(max_length = 255, unique = True)
+    types = models.CharField(max_length = 255)
+    change_pendig = models.BooleanField(default = False)
 
+    @classmethod
+    def get_default_pk(cls):
+        sensor, created = cls.objects.get_or_create(
+            name = "Default Actuator"
+        )
+        return sensor.pk
+    
 class Schedule(models.Model):
-    sensor = models.ForeignKey(
-        Sensor, on_delete=models.CASCADE, default= Sensor.get_default_pk
+    actuator = models.ForeignKey(
+        Actuator, on_delete=models.CASCADE, default= Actuator.get_default_pk
         )
     active = models.BooleanField(default = False)
     month_days = models.IntegerField(default = 0)
@@ -37,8 +48,8 @@ class Schedule(models.Model):
     active = models.BooleanField(default = False)
 
 class Rules(models.Model):
-    sensor = models.ForeignKey(
-        Sensor, on_delete=models.CASCADE, default= Sensor.get_default_pk
+    actuator = models.ForeignKey(
+        Actuator, on_delete=models.CASCADE, default= Actuator.get_default_pk
         )
     active = models.BooleanField(default = False)
     type = models.IntegerField(default = 0)
