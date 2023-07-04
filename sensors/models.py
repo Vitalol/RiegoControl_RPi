@@ -41,11 +41,10 @@ class Schedule(models.Model):
         Actuator, on_delete=models.CASCADE, default= Actuator.get_default_pk
         )
     active = models.BooleanField(default = False)
-    month_days = models.IntegerField(default = 0)
     week_days = models.IntegerField(default = 0)
     hour = models.IntegerField(default = 0)
     minute = models.IntegerField(default = 0)
-    active = models.BooleanField(default = False)
+
 
 class Rules(models.Model):
     actuator = models.ForeignKey(
