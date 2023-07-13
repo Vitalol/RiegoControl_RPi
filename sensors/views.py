@@ -52,6 +52,9 @@ def sensors_conf_rule(request, sensor_id):
     
     # Save it
     rule.save()
+    # mark actuator as change pending
+    actuator.change_pendig = 1
+    actuator.save()
     return HttpResponse(f"{tipo} {condicion} {valor} {sensor_id} {actuator.name}")
 
 def sensors_conf_schedule(request, sensor_id):
@@ -78,4 +81,8 @@ def sensors_conf_schedule(request, sensor_id):
         minute = minutes
     )
     schedule.save()
+
+    # mark actuator as change pending
+    actuator.change_pendig = 1
+    actuator.save()
     return HttpResponse(f"{(dias_binary)} {hora} {actuator.name}")
