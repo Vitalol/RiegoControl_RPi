@@ -5,7 +5,7 @@ protocol_send_measure_str test = {
     .header = {
         .destination = 0,
         .origin = 1,
-        .type = 1,
+        .type = 4,
         .lenght =  sizeof(protocol_header_str) + 3 * sizeof(measure_t)
     },
     .measures_num = 3,
@@ -15,4 +15,4 @@ protocol_send_measure_str test = {
 };
 
 datos ->
-00 01 01 13 03 00 00 20 41 01 00 00 A0 41 02 00 00 F0 41 03
+00 01 04 13 03 00 00 20 41 01 00 00 A0 41 02 00 00 F0 41 03
