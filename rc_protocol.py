@@ -26,6 +26,8 @@ RCPROTOCOLMSG_MANUAL_ACTIVATION = 5
 RCPROTOCOL_MSG_ACTUATION_RULE   = 6
 
 
+RCPROTOCOL_SET_SCHEDULER_SIZE = 8
+
 class Measure:
     def __init__(self, value:float, type:int):
         self.value = value
@@ -34,18 +36,28 @@ class Measure:
 class Scheduler:
 
     def __init__(self, week_days:int, hour:int, minute:int):
+        self.month_days = minute
         self.week_days = week_days
         self.hour = hour
         self.minute = minute
-
+        format = "<IBBB"
+        self.packed = struct.pack(format, self.month_days, self.week_days, self.hour, self.minute)
 
 class RCProtocolHeader:
 
-    def __init__(self, message) -> None:
-        self.destination = message[RCPROTOLO_HEADER_RECEIVER_INDX]
-        self.origin = message[RCPROTOLO_HEADER_SENDER_INDX]
-        self.type = message[RCPROTOLO_HEADER_MSG_PROTOCOL_INDX]
-        self.lenght = message[RCPROTOLO_HEADER_SIZE_INDX]
+    def __init__(self, message=0, destination=0, origin=0, type=0, length=0) -> None:
+        if(message):
+            self.destination = message[RCPROTOLO_HEADER_RECEIVER_INDX]
+            self.origin = message[RCPROTOLO_HEADER_SENDER_INDX]
+            self.type = message[RCPROTOLO_HEADER_MSG_PROTOCOL_INDX]
+            self.lenght = message[RCPROTOLO_HEADER_SIZE_INDX]
+        else:
+            self.destination = destination
+            self.origin = origin
+            self.type = type
+            self.lenght = length
+        format = "<BBBB"
+        self.packed = bytestring = struct.pack(format, self.destination, self.origin, self.type, self.lenght)
     
 class RCProtocolSetHour:
     def __init__(self, header:RCProtocolHeader, time:int):
@@ -57,6 +69,10 @@ class RCProtocolSetScheduler:
         self.header = header
         self.actuator_id = actuator_id 
         self.scheduler = scheduler
+        format = "<b"
+        actuator_packed = struct.pack(format, self.actuator_id)
+        self.packed = self.header.packed+actuator_packed+self.scheduler.packed
+    
 
 class RCProtocolSendMeasure:
 
@@ -75,7 +91,6 @@ class RCProtocolSendMeasure:
     
     def get_measures(self) -> list[Measure]:
         return self.measures
-
 
 
 class RCProtocolManualActivation:
@@ -130,17 +145,36 @@ def rc_protocol_handle_received_msg(message):
         #should not be received
         pass
 
+def test_receive_measure():
+    # Send measure
+    cadena_bytes = '00 01 04 13 03 00 00 20 41 01 00 00 A0 41 02 00 00 F0 41 03'
+    bytestream = bytes.fromhex(cadena_bytes.replace(' ', ''))
+    print(bytestream)
+    # send_measure =RCP.RCProtocolSendMeasure(
+    #     message=bytestream,
+    #     header=RCP.RCProtocolHeader(bytestream)
+    # )
+    # atributos = vars(send_measure)
+    # for atributo, valor in atributos.items():
+    #     print(atributo, ":", valor)
 
-# Send measure
-cadena_bytes = '00 01 04 13 03 00 00 20 41 01 00 00 A0 41 02 00 00 F0 41 03'
-bytestream = bytes.fromhex(cadena_bytes.replace(' ', ''))
-print(bytestream)
-# send_measure =RCP.RCProtocolSendMeasure(
-#     message=bytestream,
-#     header=RCP.RCProtocolHeader(bytestream)
-# )
-# atributos = vars(send_measure)
-# for atributo, valor in atributos.items():
-#     print(atributo, ":", valor)
+    rc_protocol_handle_received_msg(bytestream)
 
-rc_protocol_handle_received_msg(bytestream)
+def test_protocol_send_schedule():
+    #head 
+    head = RCProtocolHeader(destination=2,
+                        origin=0,
+                        type=RCPROTOCOL_MSG_SET_SCHEDULER,
+                        length=RCPROTOCOL_SET_SCHEDULER_SIZE)
+    schedule = Scheduler(week_days= 0b1010101,
+                         hour= 17,
+                         minute=30)
+    
+    set_scheduler = RCProtocolSetScheduler(header=head,
+                                           scheduler=schedule,
+                                           actuator_id=2)
+    print(set_scheduler.packed)
+    cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in set_scheduler.packed])
+    print(cadena_hexadecimal)
+    
+test_protocol_send_schedule()
