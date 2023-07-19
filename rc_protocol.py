@@ -52,14 +52,14 @@ class RCProtocolHeader:
             self.destination = message[RCPROTOLO_HEADER_RECEIVER_INDX]
             self.origin = message[RCPROTOLO_HEADER_SENDER_INDX]
             self.type = message[RCPROTOLO_HEADER_MSG_PROTOCOL_INDX]
-            self.lenght = message[RCPROTOLO_HEADER_SIZE_INDX]
+            self.length = message[RCPROTOLO_HEADER_SIZE_INDX]
         else:
             self.destination = destination
             self.origin = origin
             self.type = type
-            self.lenght = length
+            self.length = length
         format = "<BBBB"
-        self.packed = bytestring = struct.pack(format, self.destination, self.origin, self.type, self.lenght)
+        self.packed = bytestring = struct.pack(format, self.destination, self.origin, self.type, self.length)
     
 class RCProtocolSetHour:
     def __init__(self, header:RCProtocolHeader, time:int):
