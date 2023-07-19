@@ -2,6 +2,7 @@
 This file contais the classes and functions needed for riegocontrol protocol handling.
 """
 import struct
+import time
 import os
 import django
 
@@ -27,6 +28,7 @@ RCPROTOCOL_MSG_ACTUATION_RULE   = 6
 
 
 RCPROTOCOL_SET_SCHEDULER_SIZE = 8
+RCPROTOCOL_SET_TIME_SIZE = 4
 
 class Measure:
     def __init__(self, value:float, type:int):
@@ -63,7 +65,9 @@ class RCProtocolSetHour:
     def __init__(self, header:RCProtocolHeader, time:int):
         self.header = header
         self.time = time
-
+        format = "<i"
+        time_packed = struct.pack(format, self.time)
+        self.packed = self.header.packed+time_packed
 class RCProtocolSetScheduler:
     def __init__(self, header:RCProtocolHeader, actuator_id:int, scheduler:Scheduler):
         self.header = header
@@ -176,5 +180,16 @@ def test_protocol_send_schedule():
     print(set_scheduler.packed)
     cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in set_scheduler.packed])
     print(cadena_hexadecimal)
-    
-test_protocol_send_schedule()
+
+def test_protocol_set_hour():
+    head = RCProtocolHeader(destination=2,
+                    origin=0,
+                    type=RCPROTOCOL_MSG_SET_TIME,
+                    length=RCPROTOCOL_SET_SCHEDULER_SIZE)
+    sethour = RCProtocolSetHour(header=head,
+                                time = int(time.time()))
+    print(sethour.packed)
+    cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in sethour.packed])
+    print(cadena_hexadecimal)
+    print(time.time())
+test_protocol_set_hour()
