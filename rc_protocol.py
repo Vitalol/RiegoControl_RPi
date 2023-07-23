@@ -101,7 +101,10 @@ class RCProtocolManualActivation:
     def __init__(self, header:RCProtocolHeader, actuator_id:int, duration:int):
         self.header = header
         self.actuator_id = actuator_id
-        self.duration = duration
+        self.duration = duration #minutes
+        format = "<BB" 
+        info_packed = struct.pack(format, self.actuator_id, self.duration)
+        self.packed = self.header.packed + info_packed
 
 def rc_protocol_handle_received_msg(message):
     """ Translate the protocol message
@@ -192,4 +195,17 @@ def test_protocol_set_hour():
     cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in sethour.packed])
     print(cadena_hexadecimal)
     print(time.time())
-test_protocol_set_hour()
+
+def test_protocol_manual_activation():
+    head = RCProtocolHeader(destination=2,
+                origin=0,
+                type=RCPROTOCOL_MSG_SET_TIME,
+                length=RCPROTOCOL_SET_SCHEDULER_SIZE)
+    manual_activation = RCProtocolManualActivation(header = head,
+                                                   actuator_id= 2,
+                                                   duration= 15) 
+    print(manual_activation.packed)
+    cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in manual_activation.packed])
+    print(cadena_hexadecimal)
+    
+test_protocol_manual_activation()
