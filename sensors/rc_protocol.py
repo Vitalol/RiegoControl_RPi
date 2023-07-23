@@ -12,6 +12,8 @@ django.setup()
 from sensors.models import Measure as dbMeaseure
 from sensors.models import Sensor as dbSensor
 
+RCPROTOLO_SINK_INDX = 0
+
 RCPROTOLO_HEADER_SIZE = 4
 RCPROTOLO_HEADER_RECEIVER_INDX = 0
 RCPROTOLO_HEADER_SENDER_INDX = 1
@@ -68,6 +70,7 @@ class RCProtocolSetHour:
         format = "<i"
         time_packed = struct.pack(format, self.time)
         self.packed = self.header.packed+time_packed
+
 class RCProtocolSetScheduler:
     def __init__(self, header:RCProtocolHeader, actuator_id:int, scheduler:Scheduler):
         self.header = header
@@ -208,4 +211,3 @@ def test_protocol_manual_activation():
     cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in manual_activation.packed])
     print(cadena_hexadecimal)
     
-test_protocol_manual_activation()

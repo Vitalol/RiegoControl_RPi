@@ -5,6 +5,32 @@ from sensors.models import Sensor
 from sensors.models import Actuator
 from sensors.models import Rules
 from sensors.models import Schedule
+import sensors.rc_protocol as RCP
+import socket
+
+# Definir la dirección IP y el puerto del servidor
+IP_SERVIDOR = "127.0.0.1"  # Dirección IP del servidor
+PUERTO_SERVIDOR = 54321    # Puerto del servidor
+
+def send_socket(msg:bytearray):
+    # Crear un socket TCP/IP
+    cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Conectar el cliente al servidor
+    cliente_socket.connect((IP_SERVIDOR, PUERTO_SERVIDOR))
+
+    # Enviar datos al servidor
+    
+    cliente_socket.sendall(msg)
+
+    # Esperar la respuesta del servidor
+    datos_recibidos = cliente_socket.recv(1024)
+
+    # Decodificar y mostrar la respuesta del servidor
+    print("Respuesta del servidor:", datos_recibidos.decode())
+
+    # Cerrar la conexión con el servidor
+    cliente_socket.close()
 
 def delete_rule(actuator):
     instance = Rules.objects.filter(actuator = actuator)
@@ -55,6 +81,7 @@ def sensors_conf_rule(request, sensor_id):
     # mark actuator as change pending
     actuator.change_pendig = 1
     actuator.save()
+    send_socket("conf_rule")
     return HttpResponse(f"{tipo} {condicion} {valor} {sensor_id} {actuator.name}")
 
 def sensors_conf_schedule(request, sensor_id):
@@ -85,4 +112,18 @@ def sensors_conf_schedule(request, sensor_id):
     # mark actuator as change pending
     actuator.change_pendig = 1
     actuator.save()
+    head = RCP.RCProtocolHeader(destination=1,
+                        origin=RCP.RCPROTOLO_SINK_INDX,
+                        type=RCP.RCPROTOCOL_MSG_SET_SCHEDULER,
+                        length=RCP.RCPROTOCOL_SET_SCHEDULER_SIZE)
+    
+    schedule = RCP.Scheduler(week_days= dias,
+                         hour= hours,
+                         minute=minutes)
+    
+    set_scheduler = RCP.RCProtocolSetScheduler(header=head,
+                                           scheduler=schedule,
+                                           actuator_id=2)
+    send_socket(set_scheduler.packed)
+
     return HttpResponse(f"{(dias_binary)} {hora} {actuator.name}")

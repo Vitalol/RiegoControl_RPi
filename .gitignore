@@ -3,3 +3,4 @@ wenv
 djenv
 pidjango/__pycache__/*
 sensors/migrations/*
+*exe
