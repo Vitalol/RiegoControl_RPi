@@ -12,7 +12,8 @@ import socket
 IP_SERVIDOR = "127.0.0.1"  # Dirección IP del servidor
 PUERTO_SERVIDOR = 54321    # Puerto del servidor
 
-def send_socket(msg:bytearray):
+
+def send_socket(msg: bytearray):
     # Crear un socket TCP/IP
     cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -20,7 +21,7 @@ def send_socket(msg:bytearray):
     cliente_socket.connect((IP_SERVIDOR, PUERTO_SERVIDOR))
 
     # Enviar datos al servidor
-    
+
     cliente_socket.sendall(msg)
 
     # Esperar la respuesta del servidor
@@ -32,19 +33,23 @@ def send_socket(msg:bytearray):
     # Cerrar la conexión con el servidor
     cliente_socket.close()
 
+
 def delete_rule(actuator):
-    instance = Rules.objects.filter(actuator = actuator)
+    instance = Rules.objects.filter(actuator=actuator)
     if instance.exists():
         instance.delete()
 
+
 def delete_schdl(actuator):
-    instance = Schedule.objects.filter(actuator = actuator)
+    instance = Schedule.objects.filter(actuator=actuator)
     if instance.exists():
         instance.delete()
+
 
 def delete_conf(actuator):
     delete_rule(actuator)
     delete_schdl(actuator)
+
 
 def sensors_conf(request, sensor_id):
 
@@ -58,38 +63,54 @@ def sensors_conf(request, sensor_id):
     print(f'{sensor.name}')
     return HttpResponse(template.render(context, request))
 
+
 def sensors_conf_rule(request, sensor_id):
     # take parameters
     tipo = request.POST.get('tipo')
     condicion = request.POST.get('condicion')
-    valor = request.POST.get('valor',0)
+    valor = request.POST.get('valor', 0)
     actuator = Actuator.objects.get(id=request.POST.get('actuator'))
     print(f"{tipo} {condicion} {valor} {sensor_id} {actuator.name}")
-    
+
     # Delete previous rule/schedule
     delete_conf(actuator)
 
     # make model from parameteres
-    rule = Rules(actuator = actuator,
-                 active = True,
-                type = tipo,
-                value = valor,
-                rule = condicion)
-    
+    rule = Rules(actuator=actuator,
+                 active=True,
+                 type=tipo,
+                 value=valor,
+                 rule=condicion)
+
     # Save it
     rule.save()
     # mark actuator as change pending
     actuator.change_pendig = 1
     actuator.save()
-    send_socket("conf_rule")
+
+    head = RCP.RCProtocolHeader(destination=1,
+                                origin=RCP.RCPROTOLO_SINK_INDX,
+                                type=RCP.RCPROTOCOL_MSG_SET_RULE,
+                                length=RCP.RCPROTOCOL_SET_RULE_SIZE)
+
+    rule = RCP.Rule(rule=int(rule.rule),
+                    value=float(rule.value),
+                    type=int(rule.rule))
+
+    set_rule = RCP.RCProtocolSetRule(header=head,
+                                     rule=rule,
+                                     actuator_id=2)
+    send_socket(set_rule.packed)
+
     return HttpResponse(f"{tipo} {condicion} {valor} {sensor_id} {actuator.name}")
+
 
 def sensors_conf_schedule(request, sensor_id):
     # take parameters
-    dias_lista =request.POST.getlist('dias')
+    dias_lista = request.POST.getlist('dias')
     dias = (sum(int(dia) for dia in dias_lista))
     dias_binary = bin(dias)
-    hora = request.POST.get('hora',0)
+    hora = request.POST.get('hora', 0)
     actuator = Actuator.objects.get(id=request.POST.get('actuator'))
     print(f"{(dias_binary)} {hora} {actuator.name}")
     # hora (str) to hours and minutes
@@ -101,11 +122,11 @@ def sensors_conf_schedule(request, sensor_id):
 
     # make model from parameteres
     schedule = Schedule(
-        actuator = actuator,
-        active = True,
-        week_days = dias,
-        hour = hours,
-        minute = minutes
+        actuator=actuator,
+        active=True,
+        week_days=dias,
+        hour=hours,
+        minute=minutes
     )
     schedule.save()
 
@@ -113,17 +134,17 @@ def sensors_conf_schedule(request, sensor_id):
     actuator.change_pendig = 1
     actuator.save()
     head = RCP.RCProtocolHeader(destination=1,
-                        origin=RCP.RCPROTOLO_SINK_INDX,
-                        type=RCP.RCPROTOCOL_MSG_SET_SCHEDULER,
-                        length=RCP.RCPROTOCOL_SET_SCHEDULER_SIZE)
-    
-    schedule = RCP.Scheduler(week_days= dias,
-                         hour= hours,
-                         minute=minutes)
-    
+                                origin=RCP.RCPROTOLO_SINK_INDX,
+                                type=RCP.RCPROTOCOL_MSG_SET_SCHEDULER,
+                                length=RCP.RCPROTOCOL_SET_SCHEDULER_SIZE)
+
+    schedule = RCP.Scheduler(week_days=schedule.week_days,
+                             hour=schedule.hour,
+                             minute=schedule.minute)
+
     set_scheduler = RCP.RCProtocolSetScheduler(header=head,
-                                           scheduler=schedule,
-                                           actuator_id=2)
+                                               scheduler=schedule,
+                                               actuator_id=2)
     send_socket(set_scheduler.packed)
 
     return HttpResponse(f"{(dias_binary)} {hora} {actuator.name}")

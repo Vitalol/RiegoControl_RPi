@@ -27,10 +27,12 @@ RCPROTOCOL_MSG_SET_SCHEDULER    = 3
 RCPROTOCOL_MSG_SEND_MEASURE     = 4
 RCPROTOCOLMSG_MANUAL_ACTIVATION = 5
 RCPROTOCOL_MSG_ACTUATION_RULE   = 6
+RCPROTOCOL_MSG_SET_RULE         = 7
 
 
-RCPROTOCOL_SET_SCHEDULER_SIZE = 8
-RCPROTOCOL_SET_TIME_SIZE = 4
+RCPROTOCOL_SET_SCHEDULER_SIZE   = 8
+RCPROTOCOL_SET_RULE_SIZE        = 10
+RCPROTOCOL_SET_TIME_SIZE        = 4
 
 class Measure:
     def __init__(self, value:float, type:int):
@@ -40,12 +42,21 @@ class Measure:
 class Scheduler:
 
     def __init__(self, week_days:int, hour:int, minute:int):
-        self.month_days = minute
+        self.month_days = 0
         self.week_days = week_days
         self.hour = hour
         self.minute = minute
         format = "<IBBB"
         self.packed = struct.pack(format, self.month_days, self.week_days, self.hour, self.minute)
+
+class Rule:
+
+    def __init__(self, type:int, value:float, rule:int):
+        self.type = type
+        self.value = value
+        self.rule = rule
+        format = "<BfB"
+        self.packed = struct.pack(format, self.type, self.value, self.rule)
 
 class RCProtocolHeader:
 
@@ -80,6 +91,14 @@ class RCProtocolSetScheduler:
         actuator_packed = struct.pack(format, self.actuator_id)
         self.packed = self.header.packed+actuator_packed+self.scheduler.packed
     
+class RCProtocolSetRule:
+    def __init__(self, header:RCProtocolHeader, actuator_id:int, rule:Rule):
+        self.header = header
+        self.actuator_id = actuator_id 
+        self.rule = rule
+        format = "<b"
+        actuator_packed = struct.pack(format, self.actuator_id)
+        self.packed = self.header.packed+actuator_packed+self.rule.packed
 
 class RCProtocolSendMeasure:
 
