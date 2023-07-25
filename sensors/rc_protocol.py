@@ -41,13 +41,14 @@ class Measure:
 
 class Scheduler:
 
-    def __init__(self, week_days:int, hour:int, minute:int):
+    def __init__(self, week_days:int, hour:int, minute:int, duration:int):
         self.month_days = 0
         self.week_days = week_days
         self.hour = hour
         self.minute = minute
-        format = "<IBBB"
-        self.packed = struct.pack(format, self.month_days, self.week_days, self.hour, self.minute)
+        self.duration = duration
+        format = "<IBBBI"
+        self.packed = struct.pack(format, self.month_days, self.week_days, self.hour, self.minute, self.duration)
 
 class Rule:
 

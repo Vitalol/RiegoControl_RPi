@@ -44,6 +44,7 @@ class Schedule(models.Model):
     week_days = models.IntegerField(default = 0)
     hour = models.IntegerField(default = 0)
     minute = models.IntegerField(default = 0)
+    duration = models.IntegerField(default = 0)
 
 
 class Rules(models.Model):

@@ -112,6 +112,7 @@ def sensors_conf_schedule(request, sensor_id):
     dias_binary = bin(dias)
     hora = request.POST.get('hora', 0)
     actuator = Actuator.objects.get(id=request.POST.get('actuator'))
+    duration = request.POST.get('duration', 0)
     print(f"{(dias_binary)} {hora} {actuator.name}")
     # hora (str) to hours and minutes
     hours, minutes = map(int, hora.split(":"))
@@ -126,7 +127,8 @@ def sensors_conf_schedule(request, sensor_id):
         active=True,
         week_days=dias,
         hour=hours,
-        minute=minutes
+        minute=minutes,
+        duration=duration
     )
     schedule.save()
 
@@ -140,7 +142,8 @@ def sensors_conf_schedule(request, sensor_id):
 
     schedule = RCP.Scheduler(week_days=schedule.week_days,
                              hour=schedule.hour,
-                             minute=schedule.minute)
+                             minute=schedule.minute,
+                             duration=int(duration))
 
     set_scheduler = RCP.RCProtocolSetScheduler(header=head,
                                                scheduler=schedule,
