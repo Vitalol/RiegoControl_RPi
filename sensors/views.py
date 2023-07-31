@@ -88,7 +88,7 @@ def sensors_conf_rule(request, sensor_id):
     actuator.change_pendig = 1
     actuator.save()
 
-    head = RCP.RCProtocolHeader(destination=1,
+    head = RCP.RCProtocolHeader(destination=rule.actuator.lora_id,
                                 origin=RCP.RCPROTOLO_SINK_INDX,
                                 type=RCP.RCPROTOCOL_MSG_SET_RULE,
                                 length=RCP.RCPROTOCOL_SET_RULE_SIZE)
@@ -135,7 +135,7 @@ def sensors_conf_schedule(request, sensor_id):
     # mark actuator as change pending
     actuator.change_pendig = 1
     actuator.save()
-    head = RCP.RCProtocolHeader(destination=1,
+    head = RCP.RCProtocolHeader(destination=schedule.actuator.lora_id,
                                 origin=RCP.RCPROTOLO_SINK_INDX,
                                 type=RCP.RCPROTOCOL_MSG_SET_SCHEDULER,
                                 length=RCP.RCPROTOCOL_SET_SCHEDULER_SIZE)

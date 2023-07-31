@@ -5,6 +5,7 @@ import datetime
 # Create your models here.
 class Sensor(models.Model):
     name = models.CharField(max_length = 255, unique = True)
+    lora_id = models.IntegerField(default = 1)
     types = models.CharField(max_length = 255)
     change_pendig = models.BooleanField(default = False)
     
@@ -26,15 +27,16 @@ class Measure(models.Model):
 
 class Actuator(models.Model):
     name = models.CharField(max_length = 255, unique = True)
+    lora_id = models.IntegerField(default = 1)
     types = models.CharField(max_length = 255)
     change_pendig = models.BooleanField(default = False)
 
     @classmethod
     def get_default_pk(cls):
-        sensor, created = cls.objects.get_or_create(
+        actuator, created = cls.objects.get_or_create(
             name = "Default Actuator"
         )
-        return sensor.pk
+        return actuator.pk
     
 class Schedule(models.Model):
     actuator = models.ForeignKey(
