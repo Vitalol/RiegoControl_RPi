@@ -1,9 +1,39 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
 
 #pragma comment(lib, "ws2_32.lib")
+
+#define MAX_MEASURES_NUM 3
+#define PROTOCOL_NONE                 0
+#define PROTOCOL_MSG_SET_TIME         1
+#define PROTOCOL_MSG_DEFAULT_RULE     2
+#define PROTOCOL_MSG_SET_SCHEDULER    3
+#define PROTOCOL_MSG_SEND_MEASURE     4
+#define PROTOCO_MSG_MANUAL_ACTIVATION 5
+#define PROTOCOL_MSG_ACTUATION_RULE   6
+#define PROTOCOL_MSG_SET_RULE         7
+typedef struct measure_t {
+    float   value;
+    uint8_t type;
+}measure_t;
+
+typedef struct protocol_header_str {
+    uint8_t destination;
+    uint8_t origin;
+    uint8_t type;
+    uint8_t length;
+}protocol_header_str;
+
+
+typedef struct protocol_send_measure_str {
+    protocol_header_str header;
+    uint8_t             measures_num;
+    measure_t           measures[MAX_MEASURES_NUM];
+}protocol_send_measure_str;
+
 
 int main() {
     const char* IP = "127.0.0.1";  // Dirección IP del servidor
@@ -40,8 +70,25 @@ int main() {
         return 1;
     }
 
-    const char* mensaje = "Hola, servidor!";
-    if (send(sockfd, mensaje, strlen(mensaje), 0) == SOCKET_ERROR) {
+
+    protocol_send_measure_str  test_msg = {0};
+
+
+    test_msg.header.destination = 0;
+    test_msg.header.origin = 2;
+    test_msg.header.type = PROTOCOL_MSG_SEND_MEASURE;
+    test_msg.measures_num = 1;
+    test_msg.header.length = 0;
+
+    test_msg.header.length = sizeof(protocol_header_str) +
+        test_msg.measures_num * sizeof(measure_t);
+    
+    test_msg.measures[0].value = 10;
+    test_msg.measures[0].type = 1;
+
+
+    
+    if (send(sockfd, (const char *)&test_msg, test_msg.header.length, 0) == SOCKET_ERROR) {
         perror("send");
         closesocket(sockfd);
         WSACleanup();

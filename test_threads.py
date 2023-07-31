@@ -1,6 +1,7 @@
 import threading
 import socket
 import os
+import sensors.rc_protocol as RCP
 
 def lora_sender():
     """Esta tarea recibe la comunicación por socket y envía los datos.
@@ -38,6 +39,7 @@ def lora_sender():
             # Cerrar la conexión con el cliente
             client_socket.close()
 
+
 def lora_receiver():
     """Esta tarea va recibiendo lecturas 
     """
@@ -64,8 +66,8 @@ def lora_receiver():
             # Recibir datos del cliente
             data = client_socket.recv(1024)
             if data:
-                print(f"Datos recibidos del cliente: {data.decode()}")
-
+                print(f"Datos recibidos del cliente: {data.hex()}")
+                RCP.rc_protocol_handle_received_msg(data)
                 # Responder al cliente
                 respuesta = "¡Hola desde el servidor!"
                 client_socket.sendall(respuesta.encode())

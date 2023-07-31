@@ -138,7 +138,7 @@ def rc_protocol_handle_received_msg(message):
     
     # First bytes are the header
     header = RCProtocolHeader(message=message)
-    
+    print(header)
     
     if (header.type == RCPROTOCOL_NONE):
         #should not be received
@@ -153,7 +153,7 @@ def rc_protocol_handle_received_msg(message):
         #should not be received
         pass
     elif (header.type == RCPROTOCOL_MSG_SEND_MEASURE):
-        
+        print(f"RCPROTOCOL_MSG_SEND_MEASURE received")
         received_measure =RCProtocolSendMeasure(
             message=message,
             header=header
@@ -161,11 +161,11 @@ def rc_protocol_handle_received_msg(message):
         
         sensor = dbSensor.objects.get(id=received_measure.header.origin)
         for measure in received_measure.get_measures():
-
+            print(measure)
             measure_db = dbMeaseure(sensor = sensor,
                                 type = measure[1],
                                 value =  measure[0])
-            measure_db.save()
+            #measure_db.save()
 
         pass
     elif (header.type == RCPROTOCOLMSG_MANUAL_ACTIVATION):
@@ -231,3 +231,9 @@ def test_protocol_manual_activation():
     cadena_hexadecimal = ' '.join(['{:02x}'.format(byte) for byte in manual_activation.packed])
     print(cadena_hexadecimal)
     
+def test_rc_protocol_handle_received_msg():
+    msg_str = "0002040c0100000000002041"
+    msg = bytes.fromhex(msg_str)
+    rc_protocol_handle_received_msg(msg)
+
+test_rc_protocol_handle_received_msg()
