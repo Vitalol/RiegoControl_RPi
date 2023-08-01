@@ -15,24 +15,25 @@
 #define PROTOCO_MSG_MANUAL_ACTIVATION 5
 #define PROTOCOL_MSG_ACTUATION_RULE   6
 #define PROTOCOL_MSG_SET_RULE         7
+
 typedef struct measure_t {
     float   value;
     uint8_t type;
-}measure_t;
+}__attribute__((__packed__)) measure_t;
 
 typedef struct protocol_header_str {
     uint8_t destination;
     uint8_t origin;
     uint8_t type;
     uint8_t length;
-}protocol_header_str;
+}__attribute__((__packed__)) protocol_header_str;
 
 
 typedef struct protocol_send_measure_str {
     protocol_header_str header;
     uint8_t             measures_num;
     measure_t           measures[MAX_MEASURES_NUM];
-}protocol_send_measure_str;
+}__attribute__((__packed__)) protocol_send_measure_str;
 
 
 int main() {
@@ -81,7 +82,7 @@ int main() {
     test_msg.header.length = 0;
 
     test_msg.header.length = sizeof(protocol_header_str) +
-        test_msg.measures_num * sizeof(measure_t);
+        test_msg.measures_num * sizeof(measure_t) + 1;
     
     test_msg.measures[0].value = 10;
     test_msg.measures[0].type = 1;
