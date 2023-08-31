@@ -90,7 +90,7 @@ def sensors_conf_rule(request, sensor_id):
 
     head = RCP.RCProtocolHeader(destination=rule.actuator.lora_id,
                                 origin=RCP.RCPROTOLO_SINK_INDX,
-                                type=RCP.RCPROTOCOL_MSG_SET_RULE,
+                                type=RCP.RCPROTOCOL_MSG_ACTUATION_RULE,
                                 length=RCP.RCPROTOCOL_SET_RULE_SIZE)
 
     rule = RCP.Rule(rule=int(rule.rule),

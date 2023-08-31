@@ -27,7 +27,7 @@ RCPROTOCOL_MSG_SET_SCHEDULER    = 3
 RCPROTOCOL_MSG_SEND_MEASURE     = 4
 RCPROTOCOLMSG_MANUAL_ACTIVATION = 5
 RCPROTOCOL_MSG_ACTUATION_RULE   = 6
-RCPROTOCOL_MSG_SET_RULE         = 7
+
 
 
 RCPROTOCOL_SET_SCHEDULER_SIZE   = 8
@@ -108,7 +108,6 @@ class RCProtocolSendMeasure:
         self.message = message
         self.measures_num = self.message[RCPROTOLO_HEADER_SIZE]
         self.unpack_code = "<" + "fB"*self.measures_num
-
         measures_unpack = struct.unpack(self.unpack_code, self.message[RCPROTOLO_HEADER_SIZE+1:])
         
         self.measures = [(measures_unpack[i], measures_unpack[i + 1]) for i in range(0, len(measures_unpack), 2)]
@@ -232,7 +231,8 @@ def test_protocol_manual_activation():
     print(cadena_hexadecimal)
     
 def test_rc_protocol_handle_received_msg():
-    msg_str = "0002040c0100000000002041"
+
+    msg_str = "00 02 04 09 01 00 00 20 41 01"
     msg = bytes.fromhex(msg_str)
     rc_protocol_handle_received_msg(msg)
 
