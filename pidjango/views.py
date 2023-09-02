@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.template import loader
 from sensors.models import Sensor
+from sensors.models import Actuator
 
 
 def indx_view(request):
@@ -13,8 +14,10 @@ def indx_view(request):
     """
 
     sensors = Sensor.objects.all().values()
+    actuators = Actuator.objects.all().values()
     template = loader.get_template("index.html")
     context = {
         'sensors': sensors,
+        'actuators': actuators
     }
     return HttpResponse(template.render(context, request))

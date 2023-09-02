@@ -2,15 +2,54 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from sensors.models import Sensor
+from sensors.models import Measure
 from sensors.models import Actuator
 from sensors.models import Rules
 from sensors.models import Schedule
 import sensors.rc_protocol as RCP
+import matplotlib.pyplot as plt
 import socket
-
+import datetime
 # Definir la dirección IP y el puerto del servidor
 IP_SERVIDOR = "127.0.0.1"  # Dirección IP del servidor
 PUERTO_SERVIDOR = 54321    # Puerto del servidor
+
+
+from io import BytesIO
+import base64
+
+def grafica(request):
+    # Datos para la gráfica
+    sensor = Sensor.objects.get(id=1)
+    measures = Measure.objects.filter(sensor=sensor, type = 1)
+    measures_values_data = [(measure.date, measure.value)  for measure in measures]
+    measures_values_data_ordenada = sorted(measures_values_data, key=lambda tupla: tupla[0])
+    
+    fecha_fin = measures_values_data_ordenada[-10:][0][0]
+    print(fecha_fin)
+    fecha_inicio = fecha_fin -  datetime.timedelta(days=1)
+    
+    tuplas_en_rango = [(fecha, valor) for fecha, valor in measures_values_data if fecha_inicio <= fecha <= fecha_fin]
+
+    x, y = zip(*tuplas_en_rango)
+
+    # Crear la gráfica
+    plt.plot(x, y)
+    plt.xlabel('Fecha')
+    plt.ylabel('Valor')
+    plt.title('Nombre sensor')
+
+    # Guardar la gráfica en un objeto BytesIO en lugar de un archivo
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_data = buffer.getvalue()
+    buffer.close()
+
+    # Codificar la imagen en base64 para mostrar en una etiqueta de imagen HTML
+    image_base64 = base64.b64encode(image_data).decode('utf-8')
+
+    return render(request, 'grafica.html', {'image_base64': image_base64})
 
 
 def send_socket(msg: bytearray):
@@ -60,17 +99,27 @@ def sensors_conf(request, sensor_id):
         "actuators": actuators
     }
     template = loader.get_template("sensor_config.html")
-    print(f'{sensor.name}')
     return HttpResponse(template.render(context, request))
 
+def actuator_conf(request, actuator_id):
 
-def sensors_conf_rule(request, sensor_id):
+    sensors = Sensor.objects.all()
+    actuator = Actuator.objects.get(id=actuator_id)
+    context = {
+        'sensors': sensors,
+        "actuator": actuator
+    }
+    template = loader.get_template("actuator_config.html")
+    return HttpResponse(template.render(context, request))
+
+def conf_rule(request, actuator_id):
+
     # take parameters
     tipo = request.POST.get('tipo')
     condicion = request.POST.get('condicion')
     valor = request.POST.get('valor', 0)
-    actuator = Actuator.objects.get(id=request.POST.get('actuator'))
-    print(f"{tipo} {condicion} {valor} {sensor_id} {actuator.name}")
+    actuator = Actuator.objects.get(id=actuator_id)
+    print(f"{tipo} {condicion} {valor} {actuator_id} {actuator.name}")
 
     # Delete previous rule/schedule
     delete_conf(actuator)
@@ -102,8 +151,17 @@ def sensors_conf_rule(request, sensor_id):
                                      actuator_id=2)
     send_socket(set_rule.packed)
 
-    return HttpResponse(f"{tipo} {condicion} {valor} {sensor_id} {actuator.name}")
+def actuator_conf_rule(request, actuator_id):
 
+    
+    conf_rule(request, actuator_id)
+
+    return HttpResponse("Hola")
+
+def actuator_conf_schedule(request, actuator_id):
+
+
+    return HttpResponse("Hola")
 
 def sensors_conf_schedule(request, sensor_id):
     # take parameters
@@ -151,3 +209,8 @@ def sensors_conf_schedule(request, sensor_id):
     send_socket(set_scheduler.packed)
 
     return HttpResponse(f"{(dias_binary)} {hora} {actuator.name}")
+
+
+def actuator_conf_manual(request, actuator_id):
+
+    return HttpResponse(f"Manual")

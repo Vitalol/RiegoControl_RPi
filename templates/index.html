@@ -18,21 +18,41 @@
             <tr>
                 <th scope="col"> Nombre </th>
                 <th scope="col"> Types </th>
+                <th scope="col"> LoRa ID </th>
             </tr>
         </thead>
         <tbody>
             {% for x in sensors %}
                 <tr>
                     <td scope="row">
-                        <a href="{% url 'config' sensor_id=x.id  %}">{{x.name}}</a>
+                        <a href="{% url 'config/sensor' sensor_id=x.id  %}">{{x.name}}</a>
                     </td>
                     <td scope="row"> {{ x.types }} </td>
+                    <td scope="row"> {{ x.lora_id }} </td>
                 </tr>
                 {%endfor%}
         </tbody>
     </table>
 
-
+    <h2>Actuadores</h2>
+    <table class="table table-striped table-bordered table-hover table-responsive">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col"> Nombre </th>
+                <th scope="col"> LoRa ID </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for x in actuators %}
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'config/actuator' actuator_id=x.id  %}">{{x.name}}</a>
+                    </td>
+                    <td scope="row"> {{ x.lora_id }} </td>
+                </tr>
+                {%endfor%}
+        </tbody>
+    </table>
     
 </body>
 </html>

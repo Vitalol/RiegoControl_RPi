@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensor Config</title>
+    <title>Actuator Config</title>
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
@@ -15,6 +15,10 @@
         }
 
         .horario-opciones {
+            display: none;
+        }
+
+        .activacion-manual {
             display: none;
         }
     </style>
@@ -28,7 +32,7 @@
     <div class="container">
         <h1>RiegoControl</h1>
 
-        <p>Configuración de Sensor {{ sensor.name }}</p>
+        <p>Configuración de actuador {{ actuator.name }}</p>
 
         <p>Solo se aplicará la última configuración aplicada</p>
 
@@ -37,22 +41,56 @@
         <select id="config-type">
             <option value="regla">Configurar regla</option>
             <option value="horario">Configurar horario</option>
+            <option value="manual">Manual</option>
         </select>
 
 
 
         <div id=configuration>
 
-            <!-- Opción Datos -->
-            
             <div class=regla-opciones>
                 <h2>Regla</h2>
-            </div>
+                <form method="POST" action="{% url 'config/actuator/rule' actuator_id=actuator.id %}">
+                    {% csrf_token %}
 
-            <!-- Opción horario -->
+                    <div class="form-group d-grid">
+                        <label for="tipo">Tipo:</label>
+                        <select id="tipo" name="tipo" class="form-control">
+                            <option value="0">Temperatura</option>
+                            <option value="1">Humedad</option>
+                            <option value="2">Presión</option>
+                        </select>
+
+
+
+                        <label for="condicion">Condición:</label>
+                        <select id="condicion" name="condicion" class="form-control">
+                            <option value="0">Igual o Mayor</option>
+                            <option value="1">Menor</option>
+                        </select>
+
+
+
+                        <label for="valor">Valor:</label>
+                        <input type="text" id="valor" name="valor" class="form-control" required>
+
+
+
+                        <label for="sensor">Sensor:</label>
+                        <select id="sensor" name="sensor" class="form-control">
+                            {% for sensor in sensors %}
+                            <option value="{{ sensor.id }}">{{ sensor.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="submit" class="btn btn-primary btn-block">Configurar</button>
+                    </div>
+                </form>
+            </div>
+            
             <div class=horario-opciones>
                 <h2>Horario</h2>
-                <form method="POST" action="{% url 'config/schedule' sensor_id=sensor.id %}">
+                <form method="POST" action="{% url 'config/actuator/schedule' actuator_id=actuator.id %}">
                     {% csrf_token %}
 
                     <div class="form-group d-grid">
@@ -92,23 +130,22 @@
                             <input type="time" id="hora" name="hora" class="form-control" required>
                         </div>
 
-                        <label for="duration">Duration:</label>
+                        <label for="duration">Duración:</label>
                         <input type="text" id="duration" name="duration" class="form-control" required>
-
-                        <div class="form-group">
-                            <label for="actuator">Actuador:</label>
-                            <select id="actuator" name="actuator" class="form-control">
-                                {% for actuator in actuators %}
-                                <option value="{{ actuator.id }}">{{ actuator.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
                         <button type="submit" class="btn btn-primary btn-block">Configurar</button>
                     </div>
                 </form>
             </div>
+
+            <div class=activacion-manual>
+                <h3>Activacion manual</h3>
+                <form method="POST" action="{% url 'config/actuator/manual' actuator_id=actuator.id %}">
+                    {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-block">Activar</button>
+            </div>
+            
         </div>
+    </div>
 </body>
 
 
@@ -116,18 +153,26 @@
     const configTypeSelect = document.getElementById("config-type");
     const ruleMenu = document.querySelector(".regla-opciones");
     const scheduleMenu = document.querySelector(".horario-opciones");
+    const manualMenu = document.querySelector(".activacion-manual");
 
     configTypeSelect.addEventListener("change", function () {
         const selectedValue = configTypeSelect.value;
         if (selectedValue === "regla") {
             ruleMenu.style.display = "block";
             scheduleMenu.style.display = "none";
+            manualMenu.style.display = "none";
         } else if (selectedValue === "horario") {
             ruleMenu.style.display = "none";
             scheduleMenu.style.display = "block";
+            manualMenu.style.display = "none";
+        } else if (selectedValue === "manual") {
+            ruleMenu.style.display = "none";
+            scheduleMenu.style.display = "none";
+            manualMenu.style.display = "block";
         } else {
             ruleMenu.style.display = "none";
             scheduleMenu.style.display = "none";
+            manualMenu.style.display = "none";
         }
     });
 </script>

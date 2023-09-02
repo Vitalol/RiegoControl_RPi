@@ -5,10 +5,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pidjango.settings')
 
 django.setup()
 from sensors.models import Sensor
+from sensors.models import Measure
 
-print(Sensor.objects.all().values())
-lectura = Sensor(name = "Montaña", value =24)
-lectura.save()
-
-montaña = Sensor.objects.filter(name = "Montaña")
-print(montaña.values())
+Measure.objects.get(id=6721).delete()
+Measure.objects.get(id=6722).delete()
+Measure.objects.get(id=6723).delete()
