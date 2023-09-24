@@ -25,7 +25,7 @@
             {% for x in sensors %}
                 <tr>
                     <td scope="row">
-                        <a href="{% url 'config/sensor' sensor_id=x.id  %}">{{x.name}}</a>
+                        <a href="{% url 'sensor_graph' sensor_id=x.id  %}">{{x.name}}</a>
                     </td>
                     <td scope="row"> {{ x.types }} </td>
                     <td scope="row"> {{ x.lora_id }} </td>

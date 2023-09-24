@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mi Gráfica</title>
+    <title>Gráficas {{sensor_name}}</title>
 </head>
 <body>
-    <h1>Mi Gráfica</h1>
-    <img src="data:image/png;base64,{{ image_base64 }}" alt="Gráfica">
+    <h1>Gráficas Sensor: {{sensor_name}}</h1>
+    {% for x in image_base64 %}
+    <img src="data:image/png;base64,{{ x }}" alt="Gráfica">
+    {% endfor %}
 </body>
 </html>

@@ -7,6 +7,8 @@ from sensors.models import Actuator
 from sensors.models import Rules
 from sensors.models import Schedule
 import sensors.rc_protocol as RCP
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import socket
 import datetime
@@ -14,42 +16,59 @@ import datetime
 IP_SERVIDOR = "127.0.0.1"  # Dirección IP del servidor
 PUERTO_SERVIDOR = 54321    # Puerto del servidor
 
-
 from io import BytesIO
 import base64
 
-def grafica(request):
+def tipo_medida(indx):
+    
+    tipo_medida = { 0: 'Temperatura', 1: 'Humedad', 2: 'Presión atmosferica'}
+    return tipo_medida[indx]
+
+def sensor_graph(request, sensor_id):
     # Datos para la gráfica
-    sensor = Sensor.objects.get(id=1)
-    measures = Measure.objects.filter(sensor=sensor, type = 1)
-    measures_values_data = [(measure.date, measure.value)  for measure in measures]
-    measures_values_data_ordenada = sorted(measures_values_data, key=lambda tupla: tupla[0])
+    # Obtengo sensor
+    sensor = Sensor.objects.get(id=sensor_id)
     
-    fecha_fin = measures_values_data_ordenada[-10:][0][0]
-    print(fecha_fin)
-    fecha_inicio = fecha_fin -  datetime.timedelta(days=1)
+    # Obtengo lista de medidas del sensor
+    # Cadena de texto con números separados por comas
+
+    measure_type_list = [int(subcadena) for subcadena in (sensor.types).split(",")]
+    print(measure_type_list)
+    graph_list = []
+    for measure_type in measure_type_list:
+        plt.clf()
+        #Obtengo medidas para cadda tipo de medida
+        measures = Measure.objects.filter(sensor=sensor, type = measure_type)
+        measures_values_data = [(measure.date, measure.value)  for measure in measures]
+        measures_values_data_ordenada = sorted(measures_values_data, key=lambda tupla: tupla[0])
     
-    tuplas_en_rango = [(fecha, valor) for fecha, valor in measures_values_data if fecha_inicio <= fecha <= fecha_fin]
 
-    x, y = zip(*tuplas_en_rango)
+        fecha_fin = measures_values_data_ordenada[-10:][0][0]
+        print(fecha_fin)
+        fecha_inicio = fecha_fin -  datetime.timedelta(days=1)
 
-    # Crear la gráfica
-    plt.plot(x, y)
-    plt.xlabel('Fecha')
-    plt.ylabel('Valor')
-    plt.title('Nombre sensor')
+        tuplas_en_rango = [(fecha, valor) for fecha, valor in measures_values_data if fecha_inicio <= fecha <= fecha_fin]
 
-    # Guardar la gráfica en un objeto BytesIO en lugar de un archivo
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_data = buffer.getvalue()
-    buffer.close()
+        x, y = zip(*tuplas_en_rango)
+        # Crear la gráfica
+        plt.plot(x, y)
+        plt.xlabel('Fecha')
+        plt.ylabel('Valor')
+        plt.title(f'Medida de {tipo_medida(measure_type)}')
 
-    # Codificar la imagen en base64 para mostrar en una etiqueta de imagen HTML
-    image_base64 = base64.b64encode(image_data).decode('utf-8')
+        # Guardar la gráfica en un objeto BytesIO en lugar de un archivo
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_data = buffer.getvalue()
+        buffer.close()
 
-    return render(request, 'grafica.html', {'image_base64': image_base64})
+        # Codificar la imagen en base64 para mostrar en una etiqueta de imagen HTML
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        graph_list.append(image_base64)
+    print(len(graph_list))
+    context = {'image_base64': graph_list, 'sensor_name': sensor.name}
+    return render(request, 'grafica.html', context)
 
 
 def send_socket(msg: bytearray):
