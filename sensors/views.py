@@ -33,7 +33,6 @@ def sensor_graph(request, sensor_id):
     # Cadena de texto con números separados por comas
 
     measure_type_list = [int(subcadena) for subcadena in (sensor.types).split(",")]
-    print(measure_type_list)
     graph_list = []
     for measure_type in measure_type_list:
         plt.clf()
@@ -44,7 +43,6 @@ def sensor_graph(request, sensor_id):
     
 
         fecha_fin = measures_values_data_ordenada[-10:][0][0]
-        print(fecha_fin)
         fecha_inicio = fecha_fin -  datetime.timedelta(days=1)
 
         tuplas_en_rango = [(fecha, valor) for fecha, valor in measures_values_data if fecha_inicio <= fecha <= fecha_fin]
@@ -170,25 +168,13 @@ def conf_rule(request, actuator_id):
                                      actuator_id=2)
     send_socket(set_rule.packed)
 
-def actuator_conf_rule(request, actuator_id):
-
-    
-    conf_rule(request, actuator_id)
-
-    return HttpResponse("Hola")
-
-def actuator_conf_schedule(request, actuator_id):
-
-
-    return HttpResponse("Hola")
-
-def sensors_conf_schedule(request, sensor_id):
+def conf_schedule(request, actuator_id):
     # take parameters
     dias_lista = request.POST.getlist('dias')
     dias = (sum(int(dia) for dia in dias_lista))
     dias_binary = bin(dias)
     hora = request.POST.get('hora', 0)
-    actuator = Actuator.objects.get(id=request.POST.get('actuator'))
+    actuator = Actuator.objects.get(id=actuator_id)
     duration = request.POST.get('duration', 0)
     print(f"{(dias_binary)} {hora} {actuator.name}")
     # hora (str) to hours and minutes
@@ -230,6 +216,35 @@ def sensors_conf_schedule(request, sensor_id):
     return HttpResponse(f"{(dias_binary)} {hora} {actuator.name}")
 
 
+def actuator_conf_rule(request, actuator_id):
+
+    
+    conf_rule(request, actuator_id)
+
+    return HttpResponse("Hola")
+
+def actuator_conf_schedule(request, actuator_id):
+
+    conf_schedule(request, actuator_id)    
+    return HttpResponse("Hola")
+
+
+
+
 def actuator_conf_manual(request, actuator_id):
+    
+    head = RCP.RCProtocolHeader(destination=1,
+                            origin=RCP.RCPROTOLO_SINK_INDX,
+                            type=RCP.RCPROTOCOL_MSG_MANUAL_ACTIVATION,
+                            length=RCP.RCPROTOCOL_MANUAL_ACTIVATION_SIZE)
+
+    manual = RCP.RCProtocolManualActivation(
+            header=head,
+            actuator_id=1,
+            duration=15
+    )
+
+
+    send_socket(manual.packed)
 
     return HttpResponse(f"Manual")

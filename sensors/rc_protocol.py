@@ -20,19 +20,20 @@ RCPROTOLO_HEADER_SENDER_INDX = 1
 RCPROTOLO_HEADER_MSG_PROTOCOL_INDX = 2
 RCPROTOLO_HEADER_SIZE_INDX = 3
 
-RCPROTOCOL_NONE                 = 0
-RCPROTOCOL_MSG_SET_TIME         = 1
-RCPROTOCOL_MSG_DEFAULT_RULE     = 2
-RCPROTOCOL_MSG_SET_SCHEDULER    = 3
-RCPROTOCOL_MSG_SEND_MEASURE     = 4
-RCPROTOCOLMSG_MANUAL_ACTIVATION = 5
-RCPROTOCOL_MSG_ACTUATION_RULE   = 6
+RCPROTOCOL_NONE                     = 0
+RCPROTOCOL_MSG_SET_TIME             = 1
+RCPROTOCOL_MSG_DEFAULT_RULE         = 2
+RCPROTOCOL_MSG_SET_SCHEDULER        = 3
+RCPROTOCOL_MSG_SEND_MEASURE         = 4
+RCPROTOCOL_MSG_MANUAL_ACTIVATION    = 5
+RCPROTOCOL_MSG_ACTUATION_RULE       = 6
 
 
 
-RCPROTOCOL_SET_SCHEDULER_SIZE   = 8
-RCPROTOCOL_SET_RULE_SIZE        = 10
-RCPROTOCOL_SET_TIME_SIZE        = 4
+RCPROTOCOL_SET_SCHEDULER_SIZE       = 8
+RCPROTOCOL_SET_RULE_SIZE            = 10
+RCPROTOCOL_SET_TIME_SIZE            = 4
+RCPROTOCOL_MANUAL_ACTIVATION_SIZE   = 6
 
 class Measure:
     def __init__(self, value:float, type:int):
@@ -167,7 +168,7 @@ def rc_protocol_handle_received_msg(message):
             #measure_db.save()
 
         pass
-    elif (header.type == RCPROTOCOLMSG_MANUAL_ACTIVATION):
+    elif (header.type == RCPROTOCOL_MSG_MANUAL_ACTIVATION):
         #should not be received
         pass
     elif (header.type == RCPROTOCOL_MSG_ACTUATION_RULE) :
@@ -236,4 +237,3 @@ def test_rc_protocol_handle_received_msg():
     msg = bytes.fromhex(msg_str)
     rc_protocol_handle_received_msg(msg)
 
-test_rc_protocol_handle_received_msg()

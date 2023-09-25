@@ -17,12 +17,6 @@ import adafruit_rfm9x
 import struct
 from enum import Enum
 
-import threading
-import socket
-import os
-import sensors.rc_protocol as RCP
-
-
 LORA_HEADER_SIZE = 4
 LORA_SINK_ADDR = 0
 LORA_RECEIVER_INDX = 0
@@ -33,7 +27,25 @@ LORA_SIZE_INDX = 3
 MSG_PROTOCOL_SEND_MEASURES = 4
 PROTOCOL_MSG_SET_TIME = 1
 
-lora_semaphore = threading.Lock()
+
+def conf_buttons():
+
+    # Button A
+    btnA = DigitalInOut(board.D5)
+    btnA.direction = Direction.INPUT
+    btnA.pull = Pull.UP
+
+    # Button B
+    btnB = DigitalInOut(board.D6)
+    btnB.direction = Direction.INPUT
+    btnB.pull = Pull.UP
+
+    # Button C
+    btnC = DigitalInOut(board.D12)
+    btnC.direction = Direction.INPUT
+    btnC.pull = Pull.UP
+    return btnA, btnB, btnC
+
 
 def conf_Lora():
     # Create the I2C interface.
@@ -47,58 +59,16 @@ def conf_Lora():
     rfm9x.tx_power = 23
     return rfm9x
 
-def lora_sender(lora):
-    """Esta tarea recibe la comunicación por socket y envía los datos.
-    """
-    # Definir la dirección IP y el puerto del servidor
-    IP = "127.0.0.1"  # Dirección IP local del servidor
-    PUERTO = 54321    # Puerto para la comunicación
 
-    # Crear el socket TCP/IP
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Vincular el socket a la dirección y puerto
-    server_socket.bind((IP, PUERTO))
-
-    # Establecer el límite máximo de conexiones pendientes en la cola
-    server_socket.listen(1)
-
-    print("Esperando conexiones...")
-
-    while True:
-        # Aceptar conexiones entrantes
-        client_socket, client_address = server_socket.accept()
-
-        try:
-            # Recibir datos del cliente
-            data = client_socket.recv(1024)
-            if data:
-                print(f"Datos recibidos del cliente: {data.hex()}")
-                with lora_semaphore:
-                    lora.send(
-                        destination= data[0],   # destination
-                        node=data[1],          # origin
-                        identifier=data[2],    # type
-                        flags=data[3],         # length
-                        data=data[4:]
-                    )
-
-        finally:
-            # Cerrar la conexión con el cliente
-            client_socket.close()
-
-
-def lora_receiver(lora):
-    """Esta tarea va recibiendo lecturas 
-    """
-
-    print("LoRa RX")
-    lora_rx_running = True
+def main():
+    btnA, btnB, btnC = conf_buttons()
+    print("main")
+    rfm9x = conf_Lora()
+    main_running = True
     packet = None
     print("esperar paquete")
-    while lora_rx_running:
-        with lora_semaphore:
-            packet = lora.receive(with_header=True)
+    while main_running:
+        packet = rfm9x.receive(with_header=True)
         if packet:
             print(f"Size of packet {len(packet)}")
             receiver = packet[LORA_RECEIVER_INDX]
@@ -119,20 +89,19 @@ def lora_receiver(lora):
                 print(f"Diff time: {current_time-device_time}")
 
                 header = {
-                    "destination": 1,
+                    "destination": 5,
                     "origin": 1,
                     "type": 1,
                     "length": 8,
                 }
                 time.sleep(2)
-                with lora_semaphore:
-                    lora.send(
-                        destination=header["destination"],
-                        node=header["origin"],
-                        identifier=header["type"],
-                        flags=header["length"],
-                        data=struct.pack("<i", current_time)
-                    )
+                rfm9x.send(
+                    destination=header["destination"],
+                    node=header["origin"],
+                    identifier=header["type"],
+                    flags=header["length"],
+                    data=struct.pack("<i", current_time)
+                )
 
             if (protocol == MSG_PROTOCOL_SEND_MEASURES):
                 print("measures received")
@@ -150,22 +119,6 @@ def lora_receiver(lora):
                 except Exception as e:
                     print("Formato no adecuado")
                     print(e)
-
-
-
-def main():
-
-
-       # is equal to threading.Semaphore(1)
-
-
-    rfm9x = conf_Lora()
-    sender_thread = threading.Thread(target=lora_sender, args = (rfm9x,))
-    receiver_thread = threading.Thread(target=lora_receiver, args = (rfm9x,))
-
-    sender_thread.start()
-    receiver_thread.start()
-
 
 
 if __name__ == "__main__":
